@@ -11,7 +11,7 @@ load_dotenv()
 #% Generate quizzes using Gemini
 @st.cache_data
 def generate_quiz_with_gemini(highlight):
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    client = genai.Client(api_key=st.session_state["GEMINI_API_KEY"])
 
     prompt = (
         f"Create a multiple-choice quiz question based on the following sentence: {highlight}. "

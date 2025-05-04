@@ -74,7 +74,7 @@ def filter_highlights(annotation_data_raw, items_data):
 @st.cache_data
 def get_highlights(collection_names):
     # Initialize Zotero client
-    zot = zotero.Zotero(os.environ['ZOTERO_LIBRARY_ID'], 'user', os.environ['ZOTERO_API_KEY']) # local=True for read access to local Zotero
+    zot = zotero.Zotero(st.session_state['ZOTERO_LIBRARY_ID'], 'user', st.session_state['ZOTERO_API_KEY']) # local=True for read access to local Zotero
     # collection_names = ['Math','Statistics']
 
     # Get items data
