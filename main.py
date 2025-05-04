@@ -39,7 +39,7 @@ def generate_quiz_with_gemini(highlight):
 
 
 #%% Streamlit app for quiz generation with API key input in the sidebar
-def create_quiz_app_with_gemini(highlights):
+def create_quiz_app_with_gemini():
     st.title("Zotero Quiz Generator with Gemini")
     st.write("This app generates quizzes based on your Zotero highlights using Gemini.")
 
@@ -50,6 +50,9 @@ def create_quiz_app_with_gemini(highlights):
         st.session_state["ZOTERO_LIBRARY_ID"] = os.getenv("ZOTERO_LIBRARY_ID")
     if "ZOTERO_API_KEY" not in st.session_state and os.getenv("ZOTERO_API_KEY"):
         st.session_state["ZOTERO_API_KEY"] = os.getenv("ZOTERO_API_KEY")
+    if "COLLECTION_LIST" not in st.session_state and os.getenv("COLLECTION_LIST"):
+        st.session_state["COLLECTION_LIST"] = [name.strip() for name in os.getenv("COLLECTION_LIST").split(',') if name.strip()]
+        
 
     # Sidebar for API key input
     if (
@@ -62,6 +65,9 @@ def create_quiz_app_with_gemini(highlights):
         zotero_api_key = st.sidebar.text_input("Zotero API Key", type="password")
         zotero_library_id = st.sidebar.text_input("Zotero Library ID")
 
+        collection_names = st.sidebar.text_area("Enter collection names (comma-separated):", value="Math,Statistics")
+        collection_list = [name.strip() for name in collection_names.split(',') if name.strip()]
+
         # Save API keys to session state
         if gemini_api_key:
             st.session_state["GEMINI_API_KEY"] = gemini_api_key
@@ -69,8 +75,9 @@ def create_quiz_app_with_gemini(highlights):
             st.session_state["ZOTERO_LIBRARY_ID"] = zotero_library_id
         if zotero_api_key:
             st.session_state["ZOTERO_API_KEY"] = zotero_api_key
+        if collection_names:
+            st.session_state["COLLECTION_LIST"] = collection_list
 
-    
 
     # Check if API keys are provided
     if "GEMINI_API_KEY" not in st.session_state or "ZOTERO_LIBRARY_ID" not in st.session_state or "ZOTERO_API_KEY" not in st.session_state:
@@ -86,6 +93,8 @@ def create_quiz_app_with_gemini(highlights):
         st.session_state['current_index'] = 0
 
     # Get the current highlight
+    highlights_raw = get_highlights(st.session_state["COLLECTION_LIST"])
+    highlights = get_randomized_highlights(highlights_raw)
     current_index = st.session_state['current_index']
     if current_index >= len(highlights):
         st.write("No more questions available.")
@@ -102,7 +111,7 @@ def create_quiz_app_with_gemini(highlights):
     selected_option = st.radio("Options", options, key=f"options_{current_index}")
 
     if st.button("Submit Answer"):
-        if selected_option == correct_answer:
+        if selected_option[0] == correct_answer:
             st.success("Correct! 🎉")
         else:
             st.error(f"Incorrect. The correct answer is: {correct_answer}")
@@ -114,6 +123,4 @@ def create_quiz_app_with_gemini(highlights):
 
 #%% Example usage
 if __name__ == "__main__":
-    highlights = get_highlights()
-    highlights_list = get_randomized_highlights(highlights)
-    create_quiz_app_with_gemini(highlights_list)
+    create_quiz_app_with_gemini()
